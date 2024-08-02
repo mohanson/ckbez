@@ -6,3 +6,4 @@ description = "CKB Easy is an experimental project that aims to provide human-fr
 license = "MIT"
 
 [dependencies]
+ckb-types = "0.116.1"

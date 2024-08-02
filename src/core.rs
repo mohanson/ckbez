@@ -1,3 +1,5 @@
+use ckb_types::prelude::{Entity, IntoTransactionView};
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Script {
     pub code_hash: [u8; 32],
@@ -250,6 +252,11 @@ impl Transaction {
                 .map(|e| crate::molecule::Bytes::molecule_decode(&e))
                 .collect(),
         }
+    }
+
+    pub fn into_view(&self) -> ckb_types::core::TransactionView {
+        let tx = ckb_types::packed::Transaction::new_unchecked(ckb_types::bytes::Bytes::from(self.molecule()));
+        tx.into_view()
     }
 }
 
