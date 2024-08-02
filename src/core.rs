@@ -64,8 +64,8 @@ impl OutPoint {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CellInput {
-    since: u64,
-    previous_output: OutPoint,
+    pub since: u64,
+    pub previous_output: OutPoint,
 }
 
 impl CellInput {
@@ -96,9 +96,9 @@ impl CellInput {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CellOutput {
-    capacity: u64,
-    lock: Script,
-    kype: Option<Script>,
+    pub capacity: u64,
+    pub lock: Script,
+    pub kype: Option<Script>,
 }
 
 impl CellOutput {
@@ -129,8 +129,8 @@ impl CellOutput {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CellDep {
-    out_point: OutPoint,
-    dep_type: u8,
+    pub out_point: OutPoint,
+    pub dep_type: u8,
 }
 
 impl CellDep {
@@ -161,12 +161,12 @@ impl CellDep {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TransactionRaw {
-    version: u32,
-    cell_deps: Vec<CellDep>,
-    header_deps: Vec<[u8; 32]>,
-    inputs: Vec<CellInput>,
-    outputs: Vec<CellOutput>,
-    outputs_data: Vec<Vec<u8>>,
+    pub version: u32,
+    pub cell_deps: Vec<CellDep>,
+    pub header_deps: Vec<[u8; 32]>,
+    pub inputs: Vec<CellInput>,
+    pub outputs: Vec<CellOutput>,
+    pub outputs_data: Vec<Vec<u8>>,
 }
 
 impl TransactionRaw {
@@ -223,8 +223,8 @@ impl TransactionRaw {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Transaction {
-    raw: TransactionRaw,
-    witnesses: Vec<Vec<u8>>,
+    pub raw: TransactionRaw,
+    pub witnesses: Vec<Vec<u8>>,
 }
 
 impl Transaction {
@@ -255,9 +255,9 @@ impl Transaction {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct WitnessArgs {
-    lock: Option<Vec<u8>>,
-    input_type: Option<Vec<u8>>,
-    output_type: Option<Vec<u8>>,
+    pub lock: Option<Vec<u8>>,
+    pub input_type: Option<Vec<u8>>,
+    pub output_type: Option<Vec<u8>>,
 }
 
 impl WitnessArgs {
