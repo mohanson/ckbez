@@ -1,4 +1,6 @@
-#[derive(Clone, Debug, Eq, PartialEq)]
+use ckb_types::prelude::Entity;
+
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Script {
     pub code_hash: [u8; 32],
     pub hash_type: u8,
@@ -8,6 +10,14 @@ pub struct Script {
 impl Script {
     pub fn new(code_hash: [u8; 32], hash_type: u8, args: Vec<u8>) -> Self {
         Self { code_hash, hash_type, args }
+    }
+
+    pub fn new_type_id(args: Vec<u8>) -> Self {
+        Self {
+            code_hash: ckb_chain_spec::consensus::TYPE_ID_CODE_HASH.0,
+            hash_type: ckb_types::core::ScriptHashType::Type.into(),
+            args: args,
+        }
     }
 
     pub fn molecule(&self) -> Vec<u8> {
@@ -26,9 +36,17 @@ impl Script {
             args: crate::molecule::Bytes::molecule_decode(&result[2]),
         }
     }
+
+    pub fn pack(&self) -> ckb_types::packed::Script {
+        ckb_types::packed::Script::from_slice(&self.molecule()).unwrap()
+    }
+
+    pub fn hash(&self) -> [u8; 32] {
+        ckb_hash::blake2b_256(self.molecule())
+    }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct OutPoint {
     pub tx_hash: [u8; 32],
     pub index: u32,
@@ -60,9 +78,13 @@ impl OutPoint {
     pub fn molecule_size() -> usize {
         crate::molecule::Byte32::molecule_size() + crate::molecule::U32::molecule_size()
     }
+
+    pub fn pack(&self) -> ckb_types::packed::OutPoint {
+        ckb_types::packed::OutPoint::from_slice(&self.molecule()).unwrap()
+    }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct CellInput {
     pub since: u64,
     pub previous_output: OutPoint,
@@ -92,9 +114,13 @@ impl CellInput {
     pub fn molecule_size() -> usize {
         crate::molecule::U64::molecule_size() + OutPoint::molecule_size()
     }
+
+    pub fn pack(&self) -> ckb_types::packed::CellInput {
+        ckb_types::packed::CellInput::from_slice(&self.molecule()).unwrap()
+    }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct CellOutput {
     pub capacity: u64,
     pub lock: Script,
@@ -125,9 +151,13 @@ impl CellOutput {
             kype: if !result[2].is_empty() { Some(Script::molecule_decode(&result[2])) } else { None },
         }
     }
+
+    pub fn pack(&self) -> ckb_types::packed::CellOutput {
+        ckb_types::packed::CellOutput::from_slice(&self.molecule()).unwrap()
+    }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct CellDep {
     pub out_point: OutPoint,
     pub dep_type: u8,
@@ -157,9 +187,13 @@ impl CellDep {
     pub fn molecule_size() -> usize {
         OutPoint::molecule_size() + crate::molecule::Byte::molecule_size()
     }
+
+    pub fn pack(&self) -> ckb_types::packed::CellDep {
+        ckb_types::packed::CellDep::from_slice(&self.molecule()).unwrap()
+    }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct TransactionRaw {
     pub version: u32,
     pub cell_deps: Vec<CellDep>,
@@ -221,7 +255,7 @@ impl TransactionRaw {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Transaction {
     pub raw: TransactionRaw,
     pub witnesses: Vec<Vec<u8>>,
@@ -251,9 +285,13 @@ impl Transaction {
                 .collect(),
         }
     }
+
+    pub fn pack(&self) -> ckb_types::packed::Transaction {
+        ckb_types::packed::Transaction::from_slice(&self.molecule()).unwrap()
+    }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct WitnessArgs {
     pub lock: Option<Vec<u8>>,
     pub input_type: Option<Vec<u8>>,
@@ -297,5 +335,9 @@ impl WitnessArgs {
                 None
             },
         }
+    }
+
+    pub fn pack(&self) -> ckb_types::packed::WitnessArgs {
+        ckb_types::packed::WitnessArgs::from_slice(&self.molecule()).unwrap()
     }
 }

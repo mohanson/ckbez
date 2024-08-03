@@ -6,3 +6,10 @@ description = "CKB Easy is an experimental project that aims to provide human-fr
 license = "MIT"
 
 [dependencies]
+ckb-chain-spec = "0.116.0"
+ckb-error = "0.116.0"
+ckb-hash = "0.116.1"
+ckb-script = "0.116.1"
+ckb-traits = "0.116.1"
+ckb-types = "0.116.1"
+hex = "0.4"
