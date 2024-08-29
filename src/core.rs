@@ -194,7 +194,7 @@ impl CellDep {
 }
 
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
-pub struct TransactionRaw {
+pub struct RawTransaction {
     pub version: u32,
     pub cell_deps: Vec<CellDep>,
     pub header_deps: Vec<[u8; 32]>,
@@ -203,7 +203,7 @@ pub struct TransactionRaw {
     pub outputs_data: Vec<Vec<u8>>,
 }
 
-impl TransactionRaw {
+impl RawTransaction {
     pub fn new(
         version: u32,
         cell_deps: Vec<CellDep>,
@@ -257,12 +257,12 @@ impl TransactionRaw {
 
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Transaction {
-    pub raw: TransactionRaw,
+    pub raw: RawTransaction,
     pub witnesses: Vec<Vec<u8>>,
 }
 
 impl Transaction {
-    pub fn new(raw: TransactionRaw, witnesses: Vec<Vec<u8>>) -> Self {
+    pub fn new(raw: RawTransaction, witnesses: Vec<Vec<u8>>) -> Self {
         Self { raw, witnesses }
     }
 
@@ -278,7 +278,7 @@ impl Transaction {
     pub fn molecule_decode(data: &[u8]) -> Self {
         let result = crate::molecule::decode_dynvec(data);
         Transaction {
-            raw: TransactionRaw::molecule_decode(&result[0]),
+            raw: RawTransaction::molecule_decode(&result[0]),
             witnesses: crate::molecule::decode_dynvec(&result[1])
                 .iter()
                 .map(|e| crate::molecule::Bytes::molecule_decode(&e))
