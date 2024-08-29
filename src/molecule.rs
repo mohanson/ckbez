@@ -188,3 +188,26 @@ impl U64 {
         8
     }
 }
+
+pub struct U128 {
+    data: u128,
+}
+
+impl U128 {
+    pub fn new(data: u128) -> Self {
+        Self { data }
+    }
+
+    pub fn molecule(&self) -> Vec<u8> {
+        self.data.to_le_bytes().to_vec()
+    }
+
+    pub fn molecule_decode(data: &[u8]) -> u128 {
+        assert_eq!(data.len(), 16);
+        u128::from_le_bytes(data.try_into().unwrap())
+    }
+
+    pub fn molecule_size() -> usize {
+        16
+    }
+}

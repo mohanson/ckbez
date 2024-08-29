@@ -341,3 +341,294 @@ impl WitnessArgs {
         ckb_types::packed::WitnessArgs::from_slice(&self.molecule()).unwrap()
     }
 }
+
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
+pub struct RawHeader {
+    pub version: u32,
+    pub compact_target: u32,
+    pub timestamp: u64,
+    pub number: u64,
+    pub epoch: u64,
+    pub parent_hash: [u8; 32],
+    pub transactions_root: [u8; 32],
+    pub proposals_hash: [u8; 32],
+    pub extra_hash: [u8; 32],
+    pub dao: [u8; 32],
+}
+
+impl RawHeader {
+    pub fn new(
+        version: u32,
+        compact_target: u32,
+        timestamp: u64,
+        number: u64,
+        epoch: u64,
+        parent_hash: [u8; 32],
+        transactions_root: [u8; 32],
+        proposals_hash: [u8; 32],
+        extra_hash: [u8; 32],
+        dao: [u8; 32],
+    ) -> Self {
+        Self {
+            version,
+            compact_target,
+            timestamp,
+            number,
+            epoch,
+            parent_hash,
+            transactions_root,
+            proposals_hash,
+            extra_hash,
+            dao,
+        }
+    }
+
+    pub fn molecule(&self) -> Vec<u8> {
+        return crate::molecule::encode_seq(vec![
+            crate::molecule::U32::new(self.version).molecule(),
+            crate::molecule::U32::new(self.compact_target).molecule(),
+            crate::molecule::U64::new(self.timestamp).molecule(),
+            crate::molecule::U64::new(self.number).molecule(),
+            crate::molecule::U64::new(self.epoch).molecule(),
+            crate::molecule::Byte32::new(self.parent_hash).molecule(),
+            crate::molecule::Byte32::new(self.transactions_root).molecule(),
+            crate::molecule::Byte32::new(self.proposals_hash).molecule(),
+            crate::molecule::Byte32::new(self.extra_hash).molecule(),
+            crate::molecule::Byte32::new(self.dao).molecule(),
+        ]);
+    }
+
+    pub fn molecule_decode(data: &[u8]) -> Self {
+        let result = crate::molecule::decode_seq(
+            data,
+            &[
+                crate::molecule::U32::molecule_size(),
+                crate::molecule::U32::molecule_size(),
+                crate::molecule::U64::molecule_size(),
+                crate::molecule::U64::molecule_size(),
+                crate::molecule::U64::molecule_size(),
+                crate::molecule::Byte32::molecule_size(),
+                crate::molecule::Byte32::molecule_size(),
+                crate::molecule::Byte32::molecule_size(),
+                crate::molecule::Byte32::molecule_size(),
+                crate::molecule::Byte32::molecule_size(),
+            ],
+        );
+        Self {
+            version: crate::molecule::U32::molecule_decode(&result[0]),
+            compact_target: crate::molecule::U32::molecule_decode(&result[1]),
+            timestamp: crate::molecule::U64::molecule_decode(&result[2]),
+            number: crate::molecule::U64::molecule_decode(&result[3]),
+            epoch: crate::molecule::U64::molecule_decode(&result[4]),
+            parent_hash: crate::molecule::Byte32::molecule_decode(&result[5]),
+            transactions_root: crate::molecule::Byte32::molecule_decode(&result[6]),
+            proposals_hash: crate::molecule::Byte32::molecule_decode(&result[7]),
+            extra_hash: crate::molecule::Byte32::molecule_decode(&result[8]),
+            dao: crate::molecule::Byte32::molecule_decode(&result[9]),
+        }
+    }
+
+    pub fn molecule_size() -> usize {
+        vec![
+            crate::molecule::U32::molecule_size(),
+            crate::molecule::U32::molecule_size(),
+            crate::molecule::U64::molecule_size(),
+            crate::molecule::U64::molecule_size(),
+            crate::molecule::U64::molecule_size(),
+            crate::molecule::Byte32::molecule_size(),
+            crate::molecule::Byte32::molecule_size(),
+            crate::molecule::Byte32::molecule_size(),
+            crate::molecule::Byte32::molecule_size(),
+            crate::molecule::Byte32::molecule_size(),
+        ]
+        .iter()
+        .sum()
+    }
+
+    pub fn pack(&self) -> ckb_types::packed::RawHeader {
+        ckb_types::packed::RawHeader::from_slice(&self.molecule()).unwrap()
+    }
+}
+
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
+pub struct Header {
+    pub raw: RawHeader,
+    pub nonce: u128,
+}
+
+impl Header {
+    pub fn new(raw: RawHeader, nonce: u128) -> Self {
+        Self { raw, nonce }
+    }
+
+    pub fn molecule(&self) -> Vec<u8> {
+        return crate::molecule::encode_seq(vec![
+            self.raw.molecule(),
+            crate::molecule::U128::new(self.nonce).molecule(),
+        ]);
+    }
+
+    pub fn molecule_decode(data: &[u8]) -> Self {
+        let result =
+            crate::molecule::decode_seq(data, &[RawHeader::molecule_size(), crate::molecule::U128::molecule_size()]);
+        Self { raw: RawHeader::molecule_decode(&result[0]), nonce: crate::molecule::U128::molecule_decode(&result[1]) }
+    }
+
+    pub fn molecule_size() -> usize {
+        RawHeader::molecule_size() + crate::molecule::U128::molecule_size()
+    }
+
+    pub fn pack(&self) -> ckb_types::packed::Header {
+        ckb_types::packed::Header::from_slice(&self.molecule()).unwrap()
+    }
+}
+
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
+pub struct UncleBlock {
+    pub header: Header,
+    pub proposals: Vec<Vec<u8>>,
+}
+
+impl UncleBlock {
+    pub fn new(header: Header, proposals: Vec<Vec<u8>>) -> Self {
+        Self { header, proposals }
+    }
+
+    pub fn molecule(&self) -> Vec<u8> {
+        return crate::molecule::encode_dynvec(vec![
+            self.header.molecule(),
+            crate::molecule::encode_fixvec(self.proposals.clone()),
+        ]);
+    }
+
+    pub fn molecule_decode(data: &[u8]) -> Self {
+        let result = crate::molecule::decode_dynvec(data);
+        Self { header: Header::molecule_decode(&result[0]), proposals: crate::molecule::decode_fixvec(&result[1]) }
+    }
+
+    pub fn pack(&self) -> ckb_types::packed::UncleBlock {
+        ckb_types::packed::UncleBlock::from_slice(&self.molecule()).unwrap()
+    }
+}
+
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
+pub struct Block {
+    pub header: Header,
+    pub uncles: Vec<UncleBlock>,
+    pub transactions: Vec<Transaction>,
+    pub proposals: Vec<Vec<u8>>,
+}
+
+impl Block {
+    pub fn new(
+        header: Header,
+        uncles: Vec<UncleBlock>,
+        transactions: Vec<Transaction>,
+        proposals: Vec<Vec<u8>>,
+    ) -> Self {
+        Self { header, uncles, transactions, proposals }
+    }
+
+    pub fn molecule(&self) -> Vec<u8> {
+        return crate::molecule::encode_dynvec(vec![
+            self.header.molecule(),
+            crate::molecule::encode_dynvec(self.uncles.iter().map(|e| e.molecule()).collect()),
+            crate::molecule::encode_dynvec(self.transactions.iter().map(|e| e.molecule()).collect()),
+            crate::molecule::encode_fixvec(self.proposals.clone()),
+        ]);
+    }
+
+    pub fn molecule_decode(data: &[u8]) -> Self {
+        let result = crate::molecule::decode_dynvec(data);
+        Self {
+            header: Header::molecule_decode(&result[0]),
+            uncles: crate::molecule::decode_dynvec(&result[1]).iter().map(|e| UncleBlock::molecule_decode(e)).collect(),
+            transactions: crate::molecule::decode_dynvec(&result[2])
+                .iter()
+                .map(|e| Transaction::molecule_decode(e))
+                .collect(),
+            proposals: crate::molecule::decode_fixvec(&result[3]),
+        }
+    }
+
+    pub fn pack(&self) -> ckb_types::packed::Block {
+        ckb_types::packed::Block::from_slice(&self.molecule()).unwrap()
+    }
+}
+
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
+pub struct BlockV1 {
+    pub header: Header,
+    pub uncles: Vec<UncleBlock>,
+    pub transactions: Vec<Transaction>,
+    pub proposals: Vec<Vec<u8>>,
+    pub extension: Vec<u8>,
+}
+
+impl BlockV1 {
+    pub fn new(
+        header: Header,
+        uncles: Vec<UncleBlock>,
+        transactions: Vec<Transaction>,
+        proposals: Vec<Vec<u8>>,
+        extension: Vec<u8>,
+    ) -> Self {
+        Self { header, uncles, transactions, proposals, extension }
+    }
+
+    pub fn molecule(&self) -> Vec<u8> {
+        return crate::molecule::encode_dynvec(vec![
+            self.header.molecule(),
+            crate::molecule::encode_dynvec(self.uncles.iter().map(|e| e.molecule()).collect()),
+            crate::molecule::encode_dynvec(self.transactions.iter().map(|e| e.molecule()).collect()),
+            crate::molecule::encode_fixvec(self.proposals.clone()),
+            crate::molecule::Bytes::new(self.extension.clone()).molecule(),
+        ]);
+    }
+
+    pub fn molecule_decode(data: &[u8]) -> Self {
+        let result = crate::molecule::decode_dynvec(data);
+        Self {
+            header: Header::molecule_decode(&result[0]),
+            uncles: crate::molecule::decode_dynvec(&result[1]).iter().map(|e| UncleBlock::molecule_decode(e)).collect(),
+            transactions: crate::molecule::decode_dynvec(&result[2])
+                .iter()
+                .map(|e| Transaction::molecule_decode(e))
+                .collect(),
+            proposals: crate::molecule::decode_fixvec(&result[3]),
+            extension: crate::molecule::Bytes::molecule_decode(&result[4]),
+        }
+    }
+
+    pub fn pack(&self) -> ckb_types::packed::BlockV1 {
+        ckb_types::packed::BlockV1::from_slice(&self.molecule()).unwrap()
+    }
+}
+
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
+pub struct CellbaseWitness {
+    pub lock: Script,
+    pub message: Vec<u8>,
+}
+
+impl CellbaseWitness {
+    pub fn new(lock: Script, message: Vec<u8>) -> Self {
+        Self { lock, message }
+    }
+
+    pub fn molecule(&self) -> Vec<u8> {
+        crate::molecule::encode_dynvec(vec![
+            self.lock.molecule(),
+            crate::molecule::Bytes::new(self.message.clone()).molecule(),
+        ])
+    }
+
+    pub fn molecule_decode(data: &[u8]) -> Self {
+        let result = crate::molecule::decode_dynvec(data);
+        Self { lock: Script::molecule_decode(&result[0]), message: crate::molecule::Bytes::molecule_decode(&result[1]) }
+    }
+
+    pub fn pack(&self) -> ckb_types::packed::CellbaseWitness {
+        ckb_types::packed::CellbaseWitness::from_slice(&self.molecule()).unwrap()
+    }
+}
