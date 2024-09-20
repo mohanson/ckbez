@@ -1,5 +1,10 @@
 use ckb_types::prelude::Entity;
 
+pub const SCRIPT_HASH_TYPE_DATA: u8 = 0;
+pub const SCRIPT_HASH_TYPE_TYPE: u8 = 1;
+pub const SCRIPT_HASH_TYPE_DATA1: u8 = 2;
+pub const SCRIPT_HASH_TYPE_DATA2: u8 = 4;
+
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Script {
     pub code_hash: [u8; 32],
