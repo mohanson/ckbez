@@ -1,14 +1,12 @@
-static LOCK_ALWAYS_SUCCESS: &[u8] = include_bytes!("../res/always_success");
-
 #[test]
 fn test_unittest() {
+    let exit_0 = std::fs::read("res/exit_0").unwrap();
     let mut dl = ckbez::unittest::Resource::default();
     let mut px = ckbez::unittest::Pickaxer::default();
 
     let mut tx = ckbez::core::Transaction::default();
     // Create cell meta
-    let cell_meta_lock =
-        px.create_cell(&mut dl, 0, ckbez::core::Script::default(), Some(px.create_type_id()), LOCK_ALWAYS_SUCCESS);
+    let cell_meta_lock = px.create_cell(&mut dl, 0, ckbez::core::Script::default(), Some(px.create_type_id()), &exit_0);
     let cell_meta_i = px.create_cell(&mut dl, 0, px.create_script_by_data(&cell_meta_lock, &[]), None, &[]);
     // Create cell dep
     tx.raw.cell_deps.push(px.create_cell_dep(&cell_meta_lock));
