@@ -9,5 +9,5 @@ Features:
 
 ```toml
 [dependencies]
-ckb-ez = "0.1"
+ckbez = "0.1"
 ```
