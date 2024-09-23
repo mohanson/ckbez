@@ -171,7 +171,7 @@ impl Pickaxer {
     pub fn create_script_by_data(&self, cell_meta: &CellMeta, args: &[u8]) -> crate::core::Script {
         crate::core::Script {
             code_hash: cell_meta.data_hash,
-            hash_type: ckb_types::core::ScriptHashType::Data1.into(),
+            hash_type: ckb_types::core::ScriptHashType::Data2.into(),
             args: args.to_vec(),
         }
     }
