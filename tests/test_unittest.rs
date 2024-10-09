@@ -5,7 +5,7 @@ fn test_exit_0() {
     let mut px = ckbez::unittest::Pickaxer::default();
 
     let mut tx = ckbez::core::Transaction::default();
-    let cell_meta_lock = px.create_cell(&mut dl, 0, ckbez::core::Script::default(), Some(px.create_type_id()), &exit_0);
+    let cell_meta_lock = px.create_cell(&mut dl, 0, ckbez::core::Script::default(), None, &exit_0);
     let cell_meta_i = px.create_cell(&mut dl, 0, px.create_script_by_data(&cell_meta_lock, &[]), None, &[]);
     tx.raw.cell_deps.push(px.create_cell_dep(&cell_meta_lock));
     tx.raw.inputs.push(px.create_cell_input(&cell_meta_i));
@@ -24,10 +24,8 @@ fn test_spawn() {
     let mut px = ckbez::unittest::Pickaxer::default();
 
     let mut tx = ckbez::core::Transaction::default();
-    let cell_meta_caller =
-        px.create_cell(&mut dl, 0, ckbez::core::Script::default(), Some(px.create_type_id()), &spawn_caller);
-    let cell_meta_callee =
-        px.create_cell(&mut dl, 0, ckbez::core::Script::default(), Some(px.create_type_id()), &spawn_callee);
+    let cell_meta_caller = px.create_cell(&mut dl, 0, ckbez::core::Script::default(), None, &spawn_caller);
+    let cell_meta_callee = px.create_cell(&mut dl, 0, ckbez::core::Script::default(), None, &spawn_callee);
     let cell_meta_i = px.create_cell(&mut dl, 0, px.create_script_by_data(&cell_meta_caller, &[]), None, &[]);
     tx.raw.cell_deps.push(px.create_cell_dep(&cell_meta_caller));
     tx.raw.cell_deps.push(px.create_cell_dep(&cell_meta_callee));

@@ -1,6 +1,6 @@
 [package]
 name = "ckbez"
-version = "0.1.4"
+version = "0.118.0"
 edition = "2021"
 description = "CKB Easy is an experimental project that aims to provide human-friendly interfaces for common CKB operations."
 license = "MIT"
