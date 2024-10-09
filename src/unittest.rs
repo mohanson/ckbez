@@ -1,11 +1,11 @@
 use ckb_types::prelude::{Entity, IntoTransactionView, Pack};
 
 pub fn println_hex(name: &str, data: &[u8]) {
-    println!("Tester(........): {}(len={}): {}", name, data.len(), hex::encode(data));
+    println!("Tester log: {}: {}", name, hex::encode(data));
 }
 
 pub fn println_log(data: &str) {
-    println!("Tester(........): {}", data);
+    println!("Tester log: {}", data);
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
@@ -109,14 +109,16 @@ impl Verifier {
                     .build(),
             )),
         );
-        verifier.set_debug_printer(|script: &ckb_types::packed::Byte32, msg: &str| {
-            let str = format!("Script({})", hex::encode(&script.as_slice()[..4]));
-            println!("{}: {}", str, msg);
+        verifier.set_debug_printer(|_: &ckb_types::packed::Byte32, msg: &str| {
+            let msg = msg.trim_end_matches('\n');
+            if msg != "" {
+                println!("Script log: {}", msg);
+            }
         });
         let result = verifier.verify(u64::MAX);
         if result.is_ok() {
             let cycles = (*result.as_ref().unwrap() as f64) / 1024.0 / 1024.0;
-            println_log(&format!("cycles is {:.1} M ", cycles));
+            println!("All cycles: {:.1} M", cycles);
         }
         result
     }
