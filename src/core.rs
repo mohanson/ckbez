@@ -302,17 +302,25 @@ impl Transaction {
         for b in WitnessArgs::molecule_decode(&self.witnesses[major]).lock.unwrap() {
             assert_eq!(b, 0);
         }
-        let mut x = Vec::new();
-        x.push(major);
-        x.extend_from_slice(other);
-        x.extend_from_within(self.raw.inputs.len()..self.witnesses.len());
+        let other = other.to_vec().into_iter().take_while(|&e| e < self.witnesses.len());
+        let major_w = self.witnesses[major].clone();
+        let major_l = major_w.len() as u64;
+
         let mut b = Vec::new();
         b.extend_from_slice(&self.hash());
-        for i in x {
+        b.extend_from_slice(&major_l.to_le_bytes());
+        b.extend_from_slice(&major_w);
+        for i in other {
             let w = self.witnesses[i].clone();
             let l = w.len() as u64;
             b.extend_from_slice(&l.to_le_bytes());
             b.extend_from_slice(&w);
+        }
+        for i in self.raw.inputs.len()..self.witnesses.len() {
+            let extra_w = self.witnesses[i].clone();
+            let extra_l = extra_w.len() as u64;
+            b.extend_from_slice(&extra_l.to_le_bytes());
+            b.extend_from_slice(&extra_w);
         }
         ckb_hash::blake2b_256(b)
     }
