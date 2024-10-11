@@ -298,13 +298,17 @@ impl Transaction {
         }
     }
 
-    pub fn hash_sighash_all(&self, g: &[usize]) -> [u8; 32] {
-        for b in WitnessArgs::molecule_decode(&self.witnesses[g[0]]).lock.unwrap() {
+    pub fn hash_sighash_all(&self, major: usize, other: &[usize]) -> [u8; 32] {
+        for b in WitnessArgs::molecule_decode(&self.witnesses[major]).lock.unwrap() {
             assert_eq!(b, 0);
         }
+        let mut x = Vec::new();
+        x.push(major);
+        x.extend_from_slice(other);
+        x.extend_from_within(self.raw.inputs.len()..self.witnesses.len());
         let mut b = Vec::new();
         b.extend_from_slice(&self.hash());
-        for i in g.to_owned() {
+        for i in x {
             let w = self.witnesses[i].clone();
             let l = w.len() as u64;
             b.extend_from_slice(&l.to_le_bytes());
