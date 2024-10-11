@@ -45,12 +45,12 @@ impl Script {
         }
     }
 
-    pub fn pack(&self) -> ckb_types::packed::Script {
-        ckb_types::packed::Script::from_slice(&self.molecule()).unwrap()
-    }
-
     pub fn hash(&self) -> [u8; 32] {
         ckb_hash::blake2b_256(self.molecule())
+    }
+
+    pub fn pack(&self) -> ckb_types::packed::Script {
+        ckb_types::packed::Script::from_slice(&self.molecule()).unwrap()
     }
 }
 
@@ -261,6 +261,10 @@ impl RawTransaction {
                 .collect(),
         }
     }
+
+    pub fn hash(&self) -> [u8; 32] {
+        ckb_hash::blake2b_256(self.molecule())
+    }
 }
 
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
@@ -292,6 +296,10 @@ impl Transaction {
                 .map(|e| crate::molecule::Bytes::molecule_decode(&e))
                 .collect(),
         }
+    }
+
+    pub fn hash(&self) -> [u8; 32] {
+        self.raw.hash()
     }
 
     pub fn pack(&self) -> ckb_types::packed::Transaction {

@@ -30,6 +30,7 @@ fn test_tx() {
     ];
     let tx = ckbez::core::Transaction::molecule_decode(&data);
     assert_eq!(tx.molecule(), data);
+    assert_eq!(hex::encode(tx.raw.hash()), "8e533615e122908c5f1b216141e14f9182b87e82e7e47570cac28ca119206ea7");
 }
 
 #[test]
