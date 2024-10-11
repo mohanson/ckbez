@@ -298,6 +298,21 @@ impl Transaction {
         }
     }
 
+    pub fn hash_sighash_all(&self, g: &[usize]) -> [u8; 32] {
+        for b in WitnessArgs::molecule_decode(&self.witnesses[g[0]]).lock.unwrap() {
+            assert_eq!(b, 0);
+        }
+        let mut b = Vec::new();
+        b.extend_from_slice(&self.hash());
+        for i in g.to_owned() {
+            let w = self.witnesses[i].clone();
+            let l = w.len() as u64;
+            b.extend_from_slice(&l.to_le_bytes());
+            b.extend_from_slice(&w);
+        }
+        ckb_hash::blake2b_256(b)
+    }
+
     pub fn hash(&self) -> [u8; 32] {
         self.raw.hash()
     }
