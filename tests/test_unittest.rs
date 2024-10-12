@@ -1,6 +1,19 @@
 #[test]
+fn test_init() {
+    if !std::path::Path::new("res").exists() {
+        std::fs::create_dir("res").unwrap();
+    }
+    if !std::path::Path::new("res/ckbes").exists() {
+        let url = "https://github.com/mohanson/ckbes";
+        std::process::Command::new("git").arg("clone").arg(url).current_dir("res").status().unwrap();
+        std::process::Command::new("cargo").arg("build").arg("--examples").current_dir("res/ckbes").status().unwrap();
+    }
+}
+
+#[test]
 fn test_exit_0() {
-    let exit_0 = std::fs::read("res/exit_0").unwrap();
+    let data_root = std::path::Path::new("res/ckbes/target/riscv64imac-unknown-none-elf/debug/examples");
+    let exit_0 = std::fs::read(data_root.join("exit_0")).unwrap();
     let mut dl = ckbez::unittest::Resource::default();
     let mut px = ckbez::unittest::Pickaxer::default();
 
@@ -18,7 +31,8 @@ fn test_exit_0() {
 
 #[test]
 fn test_sighash_all() {
-    let sighash_all = std::fs::read("res/sighash_all").unwrap();
+    let data_root = std::path::Path::new("res/ckbes/target/riscv64imac-unknown-none-elf/debug/examples");
+    let sighash_all = std::fs::read(data_root.join("sighash_all")).unwrap();
     let mut dl = ckbez::unittest::Resource::default();
     let mut px = ckbez::unittest::Pickaxer::default();
 
@@ -38,8 +52,9 @@ fn test_sighash_all() {
 
 #[test]
 fn test_spawn() {
-    let spawn_caller = std::fs::read("res/spawn_caller").unwrap();
-    let spawn_callee = std::fs::read("res/spawn_callee").unwrap();
+    let data_root = std::path::Path::new("res/ckbes/target/riscv64imac-unknown-none-elf/debug/examples");
+    let spawn_caller = std::fs::read(data_root.join("spawn_caller")).unwrap();
+    let spawn_callee = std::fs::read(data_root.join("spawn_callee")).unwrap();
     let mut dl = ckbez::unittest::Resource::default();
     let mut px = ckbez::unittest::Pickaxer::default();
 
