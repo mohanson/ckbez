@@ -38,12 +38,12 @@ pub struct Resource {
 impl ckb_traits::CellDataProvider for Resource {
     fn get_cell_data(&self, out_point: &ckb_types::packed::OutPoint) -> Option<ckb_types::bytes::Bytes> {
         let out_point = crate::core::OutPoint::molecule_decode(out_point.as_slice());
-        self.cell.get(&out_point).and_then(|e| Some(ckb_types::bytes::Bytes::from(e.data.clone())))
+        self.cell.get(&out_point).map(|e| ckb_types::bytes::Bytes::from(e.data.clone()))
     }
 
     fn get_cell_data_hash(&self, out_point: &ckb_types::packed::OutPoint) -> Option<ckb_types::packed::Byte32> {
         let out_point = crate::core::OutPoint::molecule_decode(out_point.as_slice());
-        self.cell.get(&out_point).and_then(|e| Some(ckb_types::packed::Byte32::from_slice(&e.data_hash).unwrap()))
+        self.cell.get(&out_point).map(|e| ckb_types::packed::Byte32::from_slice(&e.data_hash).unwrap())
     }
 }
 
@@ -111,7 +111,7 @@ impl Verifier {
         );
         verifier.set_debug_printer(|_: &ckb_types::packed::Byte32, msg: &str| {
             let msg = msg.trim_end_matches('\n');
-            if msg != "" {
+            if !msg.is_empty() {
                 println!("Script log: {}", msg);
             }
         });
@@ -131,12 +131,6 @@ pub struct Pickaxer {
 }
 
 impl Pickaxer {
-    pub fn create_type_id(&self) -> crate::core::Script {
-        let mut args = vec![0u8; 32];
-        args[28..].copy_from_slice(&self.outpoint_i.to_be_bytes());
-        crate::core::Script::new_type_id(args)
-    }
-
     pub fn create_cell(
         &mut self,
         dl: &mut Resource,
@@ -145,16 +139,16 @@ impl Pickaxer {
         kype: Option<crate::core::Script>,
         data: &[u8],
     ) -> CellMeta {
-        let cell_out_point = crate::core::OutPoint::new(self.outpoint_hash.clone(), self.outpoint_i);
-        let cell_output = crate::core::CellOutput { capacity: capacity, lock: lock, kype: kype };
+        let cell_out_point = crate::core::OutPoint::new(self.outpoint_hash, self.outpoint_i);
+        let cell_output = crate::core::CellOutput { capacity, lock, kype };
         let cell_meta = CellMeta::new(cell_out_point.clone(), cell_output, data);
         dl.cell.insert(cell_out_point, cell_meta.clone());
         self.outpoint_i += 1;
         cell_meta
     }
 
-    pub fn create_cell_dep(&self, cell_meta: &CellMeta) -> crate::core::CellDep {
-        crate::core::CellDep { out_point: cell_meta.out_point.clone(), dep_type: ckb_types::core::DepType::Code.into() }
+    pub fn create_cell_dep(&self, cell_meta: &CellMeta, dep_type: u8) -> crate::core::CellDep {
+        crate::core::CellDep { out_point: cell_meta.out_point.clone(), dep_type }
     }
 
     pub fn create_cell_input(&self, cell_meta: &CellMeta) -> crate::core::CellInput {
@@ -167,7 +161,7 @@ impl Pickaxer {
         lock: crate::core::Script,
         kype: Option<crate::core::Script>,
     ) -> crate::core::CellOutput {
-        crate::core::CellOutput { capacity: capacity, lock: lock, kype: kype }
+        crate::core::CellOutput { capacity, lock, kype }
     }
 
     pub fn create_script_by_data(&self, cell_meta: &CellMeta, args: &[u8]) -> crate::core::Script {

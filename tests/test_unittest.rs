@@ -7,7 +7,7 @@ fn test_exit_0() {
     let mut tx = ckbez::core::Transaction::default();
     let cell_meta_lock = px.create_cell(&mut dl, 0, ckbez::core::Script::default(), None, &exit_0);
     let cell_meta_i = px.create_cell(&mut dl, 0, px.create_script_by_data(&cell_meta_lock, &[]), None, &[]);
-    tx.raw.cell_deps.push(px.create_cell_dep(&cell_meta_lock));
+    tx.raw.cell_deps.push(px.create_cell_dep(&cell_meta_lock, 0));
     tx.raw.inputs.push(px.create_cell_input(&cell_meta_i));
     tx.raw.outputs.push(px.create_cell_output(0, ckbez::core::Script::default(), None));
     tx.raw.outputs_data.push(vec![]);
@@ -25,7 +25,7 @@ fn test_sighash_all() {
     let mut tx = ckbez::core::Transaction::default();
     let cell_meta_lock = px.create_cell(&mut dl, 0, ckbez::core::Script::default(), None, &sighash_all);
     let cell_meta_i = px.create_cell(&mut dl, 0, px.create_script_by_data(&cell_meta_lock, &[]), None, &[]);
-    tx.raw.cell_deps.push(px.create_cell_dep(&cell_meta_lock));
+    tx.raw.cell_deps.push(px.create_cell_dep(&cell_meta_lock, 0));
     tx.raw.inputs.push(px.create_cell_input(&cell_meta_i));
     tx.raw.outputs.push(px.create_cell_output(0, ckbez::core::Script::default(), None));
     tx.raw.outputs_data.push(vec![]);
@@ -47,8 +47,8 @@ fn test_spawn() {
     let cell_meta_caller = px.create_cell(&mut dl, 0, ckbez::core::Script::default(), None, &spawn_caller);
     let cell_meta_callee = px.create_cell(&mut dl, 0, ckbez::core::Script::default(), None, &spawn_callee);
     let cell_meta_i = px.create_cell(&mut dl, 0, px.create_script_by_data(&cell_meta_caller, &[]), None, &[]);
-    tx.raw.cell_deps.push(px.create_cell_dep(&cell_meta_caller));
-    tx.raw.cell_deps.push(px.create_cell_dep(&cell_meta_callee));
+    tx.raw.cell_deps.push(px.create_cell_dep(&cell_meta_caller, 0));
+    tx.raw.cell_deps.push(px.create_cell_dep(&cell_meta_callee, 0));
     tx.raw.inputs.push(px.create_cell_input(&cell_meta_i));
     tx.raw.outputs.push(px.create_cell_output(0, ckbez::core::Script::default(), None));
     tx.raw.outputs_data.push(vec![]);
