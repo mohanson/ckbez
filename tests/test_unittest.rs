@@ -9,8 +9,6 @@ fn test_exit_0() {
     let cell_meta_i = px.create_cell(&mut dl, 0, px.create_script_by_data(&cell_meta_lock, &[]), None, &[]);
     tx.raw.cell_deps.push(px.create_cell_dep(&cell_meta_lock, 0));
     tx.raw.inputs.push(px.create_cell_input(&cell_meta_i));
-    tx.raw.outputs.push(px.create_cell_output(0, ckbez::core::Script::default(), None));
-    tx.raw.outputs_data.push(vec![]);
 
     let verifier = ckbez::unittest::Verifier::default();
     verifier.verify(&tx, &dl).unwrap();
@@ -27,8 +25,6 @@ fn test_sighash_all() {
     let cell_meta_i = px.create_cell(&mut dl, 0, px.create_script_by_data(&cell_meta_lock, &[]), None, &[]);
     tx.raw.cell_deps.push(px.create_cell_dep(&cell_meta_lock, 0));
     tx.raw.inputs.push(px.create_cell_input(&cell_meta_i));
-    tx.raw.outputs.push(px.create_cell_output(0, ckbez::core::Script::default(), None));
-    tx.raw.outputs_data.push(vec![]);
     tx.witnesses.push(ckbez::core::WitnessArgs::new(Some(vec![0; 32]), None, None).molecule());
     tx.witnesses[0] = ckbez::core::WitnessArgs::new(Some(tx.hash_sighash_all(0, &[]).to_vec()), None, None).molecule();
 
@@ -50,8 +46,6 @@ fn test_spawn() {
     tx.raw.cell_deps.push(px.create_cell_dep(&cell_meta_caller, 0));
     tx.raw.cell_deps.push(px.create_cell_dep(&cell_meta_callee, 0));
     tx.raw.inputs.push(px.create_cell_input(&cell_meta_i));
-    tx.raw.outputs.push(px.create_cell_output(0, ckbez::core::Script::default(), None));
-    tx.raw.outputs_data.push(vec![]);
 
     let verifier = ckbez::unittest::Verifier::default();
     verifier.verify(&tx, &dl).unwrap();
