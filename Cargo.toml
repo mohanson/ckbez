@@ -1,15 +1,15 @@
 [package]
 name = "ckbez"
-version = "0.119.0"
+version = "0.120.0"
 edition = "2021"
 description = "CKB Easy is an experimental project that aims to provide human-friendly interfaces for common CKB operations."
 license = "MIT"
 
 [dependencies]
-ckb-chain-spec = "0.119"
-ckb-error = "0.119"
-ckb-hash = "0.119"
-ckb-script = "0.119"
-ckb-traits = "0.119"
-ckb-types = "0.119"
+ckb-chain-spec = "0.120"
+ckb-error = "0.120"
+ckb-hash = "0.120"
+ckb-script = "0.120"
+ckb-traits = "0.120"
+ckb-types = "0.120"
 hex = "0.4"
