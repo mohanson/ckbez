@@ -9,14 +9,14 @@ pub fn println_log(data: &str) {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
-pub struct CellMeta {
+pub struct Cell {
     pub out_point: crate::core::OutPoint,
     pub cell_output: crate::core::CellOutput,
     pub data: Vec<u8>,
     pub data_hash: [u8; 32],
 }
 
-impl CellMeta {
+impl Cell {
     pub fn new(out_point: crate::core::OutPoint, cell_output: crate::core::CellOutput, data: &[u8]) -> Self {
         Self { out_point, cell_output, data: data.to_vec(), data_hash: ckb_hash::blake2b_256(data) }
     }
@@ -32,7 +32,7 @@ impl CellMeta {
 
 #[derive(Clone, Default)]
 pub struct Resource {
-    pub cell: std::collections::HashMap<crate::core::OutPoint, CellMeta>,
+    pub cell: std::collections::HashMap<crate::core::OutPoint, Cell>,
 }
 
 impl ckb_traits::CellDataProvider for Resource {
@@ -138,21 +138,21 @@ impl Pickaxer {
         lock: crate::core::Script,
         kype: Option<crate::core::Script>,
         data: &[u8],
-    ) -> CellMeta {
+    ) -> Cell {
         let cell_out_point = crate::core::OutPoint::new(self.outpoint_hash, self.outpoint_incr);
         let cell_output = crate::core::CellOutput { capacity, lock, kype };
-        let cell_meta = CellMeta::new(cell_out_point.clone(), cell_output, data);
+        let cell_meta = Cell::new(cell_out_point.clone(), cell_output, data);
         dl.cell.insert(cell_out_point, cell_meta.clone());
         self.outpoint_incr += 1;
         cell_meta
     }
 
-    pub fn create_cell_dep(&self, cell_meta: &CellMeta, dep_type: u8) -> crate::core::CellDep {
-        crate::core::CellDep { out_point: cell_meta.out_point.clone(), dep_type }
+    pub fn create_cell_dep(&self, cell: &Cell, dep_type: u8) -> crate::core::CellDep {
+        crate::core::CellDep { out_point: cell.out_point.clone(), dep_type }
     }
 
-    pub fn create_cell_input(&self, cell_meta: &CellMeta) -> crate::core::CellInput {
-        crate::core::CellInput::new(0, cell_meta.out_point.clone())
+    pub fn create_cell_input(&self, cell: &Cell) -> crate::core::CellInput {
+        crate::core::CellInput::new(0, cell.out_point.clone())
     }
 
     pub fn create_cell_output(
@@ -164,17 +164,17 @@ impl Pickaxer {
         crate::core::CellOutput { capacity, lock, kype }
     }
 
-    pub fn create_script_by_data(&self, cell_meta: &CellMeta, args: &[u8]) -> crate::core::Script {
+    pub fn create_script_by_data(&self, cell: &Cell, args: &[u8]) -> crate::core::Script {
         crate::core::Script {
-            code_hash: cell_meta.data_hash,
+            code_hash: cell.data_hash,
             hash_type: ckb_types::core::ScriptHashType::Data2.into(),
             args: args.to_vec(),
         }
     }
 
-    pub fn create_script_by_type(&self, cell_meta: &CellMeta, args: &[u8]) -> crate::core::Script {
+    pub fn create_script_by_type(&self, cell: &Cell, args: &[u8]) -> crate::core::Script {
         crate::core::Script {
-            code_hash: cell_meta.cell_output.kype.clone().unwrap().hash(),
+            code_hash: cell.cell_output.kype.clone().unwrap().hash(),
             hash_type: ckb_types::core::ScriptHashType::Type.into(),
             args: args.to_vec(),
         }
