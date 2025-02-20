@@ -127,7 +127,7 @@ impl Verifier {
 #[derive(Clone, Default)]
 pub struct Pickaxer {
     outpoint_hash: [u8; 32],
-    outpoint_i: u32,
+    outpoint_incr: u32,
 }
 
 impl Pickaxer {
@@ -139,11 +139,11 @@ impl Pickaxer {
         kype: Option<crate::core::Script>,
         data: &[u8],
     ) -> CellMeta {
-        let cell_out_point = crate::core::OutPoint::new(self.outpoint_hash, self.outpoint_i);
+        let cell_out_point = crate::core::OutPoint::new(self.outpoint_hash, self.outpoint_incr);
         let cell_output = crate::core::CellOutput { capacity, lock, kype };
         let cell_meta = CellMeta::new(cell_out_point.clone(), cell_output, data);
         dl.cell.insert(cell_out_point, cell_meta.clone());
-        self.outpoint_i += 1;
+        self.outpoint_incr += 1;
         cell_meta
     }
 
@@ -178,5 +178,11 @@ impl Pickaxer {
             hash_type: ckb_types::core::ScriptHashType::Type.into(),
             args: args.to_vec(),
         }
+    }
+
+    pub fn create_type_id(&self) -> crate::core::Script {
+        let mut args = vec![0u8; 32];
+        args[28..].copy_from_slice(&self.outpoint_incr.to_be_bytes());
+        crate::core::Script::new_type_id(args)
     }
 }
