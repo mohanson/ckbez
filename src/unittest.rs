@@ -13,12 +13,15 @@ pub struct Cell {
     pub out_point: crate::core::OutPoint,
     pub cell_output: crate::core::CellOutput,
     pub data: Vec<u8>,
-    pub data_hash: [u8; 32],
 }
 
 impl Cell {
     pub fn new(out_point: crate::core::OutPoint, cell_output: crate::core::CellOutput, data: &[u8]) -> Self {
-        Self { out_point, cell_output, data: data.to_vec(), data_hash: ckb_hash::blake2b_256(data) }
+        Self { out_point, cell_output, data: data.to_vec() }
+    }
+
+    pub fn data_hash(&self) -> [u8; 32] {
+        ckb_hash::blake2b_256(&self.data)
     }
 
     pub fn pack(&self) -> ckb_types::core::cell::CellMeta {
@@ -43,7 +46,7 @@ impl ckb_traits::CellDataProvider for Resource {
 
     fn get_cell_data_hash(&self, out_point: &ckb_types::packed::OutPoint) -> Option<ckb_types::packed::Byte32> {
         let out_point = crate::core::OutPoint::molecule_decode(out_point.as_slice());
-        self.cell.get(&out_point).map(|e| ckb_types::packed::Byte32::from_slice(&e.data_hash).unwrap())
+        self.cell.get(&out_point).map(|e| ckb_types::packed::Byte32::from_slice(&e.data_hash()).unwrap())
     }
 }
 
@@ -166,7 +169,7 @@ impl Pickaxer {
 
     pub fn create_script_by_data(&self, cell: &Cell, args: &[u8]) -> crate::core::Script {
         crate::core::Script {
-            code_hash: cell.data_hash,
+            code_hash: cell.data_hash(),
             hash_type: ckb_types::core::ScriptHashType::Data2.into(),
             args: args.to_vec(),
         }
