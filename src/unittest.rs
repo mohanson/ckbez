@@ -102,7 +102,7 @@ impl Verifier {
             ckb2023: ckb_types::core::hardfork::CKB2023::new_dev_default(),
         };
         let consensus = ckb_chain_spec::consensus::ConsensusBuilder::default().hardfork_switch(hardfork).build();
-        let mut verifier = ckb_script::TransactionScriptsVerifier::new(
+        let verifier = ckb_script::TransactionScriptsVerifier::new_with_debug_printer(
             std::sync::Arc::new(tx_resolved.clone()),
             dl.clone(),
             std::sync::Arc::new(consensus),
@@ -111,13 +111,13 @@ impl Verifier {
                     .epoch(ckb_types::core::EpochNumberWithFraction::new(0, 0, 1).pack())
                     .build(),
             )),
+            std::sync::Arc::new(|_: &ckb_types::packed::Byte32, msg: &str| {
+                let msg = msg.trim_end_matches('\n');
+                if !msg.is_empty() {
+                    println!("Script log: {}", msg);
+                }
+            }),
         );
-        verifier.set_debug_printer(|_: &ckb_types::packed::Byte32, msg: &str| {
-            let msg = msg.trim_end_matches('\n');
-            if !msg.is_empty() {
-                println!("Script log: {}", msg);
-            }
-        });
         let result = verifier.verify(u64::MAX);
         if result.is_ok() {
             let cycles = (*result.as_ref().unwrap() as f64) / 1024.0 / 1024.0;
