@@ -33,6 +33,21 @@ impl Cell {
     }
 }
 
+pub struct CyclesReadable(u64);
+
+impl std::fmt::Display for CyclesReadable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)?;
+        if self.0 >= 1024 * 1024 {
+            write!(f, "({:.1}M)", self.0 as f64 / 1024. / 1024.)?;
+        } else if self.0 >= 1024 {
+            write!(f, "({:.1}K)", self.0 as f64 / 1024.)?;
+        } else {
+        }
+        Ok(())
+    }
+}
+
 #[derive(Clone, Default)]
 pub struct Resource {
     pub cell: std::collections::HashMap<crate::core::OutPoint, Cell>,
@@ -120,8 +135,7 @@ impl Verifier {
         );
         let result = verifier.verify(u64::MAX);
         if result.is_ok() {
-            let cycles = (*result.as_ref().unwrap() as f64) / 1024.0 / 1024.0;
-            println!("All cycles: {:.1} M", cycles);
+            println!("All cycles: {}", CyclesReadable(result.clone().unwrap()));
         }
         result
     }
