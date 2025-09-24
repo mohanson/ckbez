@@ -4,7 +4,7 @@ CKB Easy is an experimental project that aims to provide human-friendly interfac
 
 ```toml
 [dependencies]
-ckbez = "0.120"
+ckbez = "0.202"
 ```
 
 Features:
@@ -34,7 +34,7 @@ Create a transaction whose input is locked by the exit_0 contract, and execute i
 ```sh
 $ cargo run --example unittest
 
-# All cycles: 0.0 M
+# All cycles: 9374(9.2K)
 ```
 
 ## Licences
