@@ -4,7 +4,7 @@ CKB Easy is an experimental project that aims to provide human-friendly interfac
 
 ```toml
 [dependencies]
-ckbez = "0.202"
+ckbez = "1.0"
 ```
 
 Features:
